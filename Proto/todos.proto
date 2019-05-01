@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package TodosPackage;
+
+service TodosService {
+  rpc ping(Ping) returns (Pong) {}
+  rpc list (Empty) returns (TodoList);
+  rpc insert (Todo) returns (Todo);
+  rpc delete (TodoRequestId) returns (Todo);
+}
+
+message Ping {
+  required bool ping = 1;
+}
+
+message Pong {
+  required bool pong = 1;
+}
+
+message Empty {}
+
+message Todo {
+  string id = 1;
+  string title = 2;
+}
+
+message TodoRequestId {
+  string id = 1;
+}
+
+message TodoList {
+   repeated Todo todos = 1;
+}
