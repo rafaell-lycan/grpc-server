@@ -1,6 +1,6 @@
 const client = require('./client');
 
-const id = process.argv[2];
+const id = String(process.argv[2]);
 
 if (!id) {
   console.error('Expected a valid id!');

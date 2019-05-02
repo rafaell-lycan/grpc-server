@@ -1,6 +1,6 @@
 const client = require('./client');
 
-const title = process.argv[2];
+const title = String(process.argv[2]);
 
 if (!title) {
   console.error('Expected a valid title!');
