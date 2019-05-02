@@ -3,7 +3,7 @@ syntax = "proto3";
 package TodosPackage;
 
 service TodosService {
-  rpc ping(Ping) returns (Pong) {}
+  rpc ping(Ping) returns (Pong);
   rpc list (Empty) returns (TodoList);
   rpc insert (Todo) returns (Todo);
   rpc delete (TodoRequestId) returns (Todo);

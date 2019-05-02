@@ -1,37 +1,62 @@
+const APPNAME = 'GRPC_SERVER_V1.0';
+require('dotenv').config();
 const path = require('path');
 const grpc = require('grpc');
-require('dotenv').config();
+const debug = require('debug')(APPNAME);
 
-//load controllers
-const todosController = require('./controllers/todos.controller');
+class Server {
+  constructor(config) {
+    const {
+      pkg,
+      proto,
+      service,
+    } = config;
+    this.server = new grpc.Server();
+    this.proto = grpc.load({
+      root: path.join(__dirname, 'Proto'),
+      file: proto
+    })[pkg];
 
-// const APPNAME = 'TODO_QHANDLER_V1.0';
+    this.setup(service);
+  }
 
-const todosProto = grpc.load({
-  root: path.join(__dirname, 'Proto'),
-  file: 'todos.proto'
-})[process.env.GRPC_PACKAGE_NAME];
+  setup(serviceName) {
+    debug('Setup...');
+    //load controllers
+    const todosController = require('./controllers/todos.controller')(debug);
 
-const server = new grpc.Server();
-const allServices = ['TodosService'];
-allServices.forEach((service) => {
-  server.addService(todosProto[service].service, {
-    //define all of your services here
-    list: todosController.all,
-    insert: todosController.create,
-    delete: todosController.delete,
-  });
-});
+    debug(`Configuring service ${serviceName}`);
+    const allServices = [serviceName];
+    allServices.forEach((service) => {
+      this.server.addService(this.proto[service].service, {
+        //define all of your services here
+        list: todosController.all,
+        insert: todosController.create,
+        delete: todosController.delete,
+      });
+    });
+  }
 
-//start grpc server
-try {
-  server.bind(
-    `${process.env.HOST}:${process.env.PORT}`,
-    grpc.ServerCredentials.createInsecure()
-  );
-  server.start();
-  console.log(`GRPC Server running on port ${process.env.PORT}`);
-} catch (error) {
-  console.error(error);
-  process.exit(1);
+  start() {
+    debug('Starting GRPC Server');
+    //start grpc server
+    try {
+      this.server.bind(
+        `${process.env.HOST}:${process.env.PORT}`,
+        grpc.ServerCredentials.createInsecure()
+      );
+      this.server.start();
+      debug(`GRPC Server running on port ${process.env.PORT}`);
+    } catch (error) {
+      console.error(error);
+      process.exit(1);
+    }
+  }
 }
+
+const server = new Server({
+  pkg: process.env.GRPC_PACKAGE_NAME,
+  proto: 'todos.proto',
+  service: 'TodosService'
+});
+server.start()
